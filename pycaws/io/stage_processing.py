@@ -138,9 +138,6 @@ def _data_reader(file):
     site_name[1].replace(' ', '-')
     site = site_code + '_' + site_name[1]
 
-    # Create a meters column.
-    df['H(m)'] = df['X_00065_00000'] / 3.28
-
     # Convert index into a datetime index for easier indexing.
     df.index = pd.to_datetime(df.index)
     return df_raw, df, site, site_code
@@ -170,6 +167,8 @@ def _resampler(df_year, year):
     df_15_reindex = df_15.reindex(idx_15, fill_value=np.nan)
     # Adding all columns to match example excel.
     df_15_reindex = df_15_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    # Adding meters column by dividing the feet column by 3.28.
+    df_15_reindex['H(m)'] = df_15_reindex['H(ft)'] / 3.28
     df_15_reindex['DateTime2'] = df_15_reindex.index
     df_15_reindex['Date'] = df_15_reindex.index
     df_15_reindex['Date2'] = df_15_reindex.index
@@ -194,6 +193,7 @@ def _resampler(df_year, year):
     # Similar to 15 minute interval code but 30 minutes interval.
     df_30_reindex = df_30.reindex(idx_30, fill_value=np.nan)
     df_30_reindex = df_30_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_30_reindex['H(m)'] = df_30_reindex['H(ft)'] / 3.28
     df_30_reindex['DateTime2'] = df_30_reindex.index
     df_30_reindex['Date'] = df_30_reindex.index
     df_30_reindex['Date2'] = df_30_reindex.index
@@ -214,6 +214,7 @@ def _resampler(df_year, year):
     # Similar to 15 minute interval code but hourly interval.
     df_1h_reindex = df_1h.reindex(idx_1h, fill_value=np.nan)
     df_1h_reindex = df_1h_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_1h_reindex['H(m)'] = df_1h_reindex['H(ft)'] / 3.28
     df_1h_reindex['DateTime2'] = df_1h_reindex.index
     df_1h_reindex['Date'] = df_1h_reindex.index
     df_1h_reindex['Date2'] = df_1h_reindex.index
@@ -234,6 +235,7 @@ def _resampler(df_year, year):
     # Similar to 15 minute interval code but daily interval.
     df_1d_reindex = df_1d.reindex(idx_1d, fill_value=np.nan)
     df_1d_reindex = df_1d_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_1d_reindex['H(m)'] = df_1d_reindex['H(ft)'] / 3.28
     df_1d_reindex['DateTime2'] = df_1d_reindex.index
     df_1d_reindex['Date'] = df_1d_reindex.index
     df_1d_reindex['Date2'] = df_1d_reindex.index
