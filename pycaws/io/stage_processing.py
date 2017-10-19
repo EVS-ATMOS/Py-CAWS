@@ -99,10 +99,14 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
                 save_path_1d = (os.path.expanduser('~') + '/' + site + '_'
                                 + str(year) + '_daily_stage_data.csv')
             else:
-                save_path_15 = csv_filepath + site + '_15min_stage_data.csv'
-                save_path_30 = csv_filepath + site + '_30min_stage_data.csv'
-                save_path_1h = csv_filepath + site + '_hourly_stage_data.csv'
-                save_path_1d = csv_filepath + site + '_daily_stage_data.csv'
+                save_path_15 = (csv_filepath + site + '_' + str(year)
+                                + '_15min_stage_data.csv')
+                save_path_30 = (csv_filepath + site + '_' + str(year)
+                                + '_30min_stage_data.csv')
+                save_path_1h = (csv_filepath + site + '_' + str(year)
+                                + '_hourly_stage_data.csv')
+                save_path_1d = (csv_filepath + site + '_' + str(year)
+                                + '_daily_stage_data.csv')
 
             df_15_reindex.to_csv(save_path_15)
             df_30_reindex.to_csv(save_path_30)
@@ -138,8 +142,7 @@ def _data_reader(file):
     # Retrieve site information to be used in saved excel filenames.
     site_code = file[-9:]
     site_name = [v for v in site_dict.items() if site_code in v][0]
-    site_name[1].replace(' ', '-')
-    site = site_code + '_' + site_name[1]
+    site = site_code + '_' + site_name[1].replace(' ', '-')
 
     # Convert index into a datetime index for easier indexing.
     df.index = pd.to_datetime(df.index)
