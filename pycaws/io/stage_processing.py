@@ -61,7 +61,9 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
 
             # Takes raw and each time interval of data and creates a sheet
             # for each.
-            writer = pd.ExcelWriter(save_path, engine='xlsxwriter')
+            writer = pd.ExcelWriter(save_path, engine='xlsxwriter',
+                                    datetime_format='m/d/yyyy h:mm',
+                                    date_format='m/d/yyyy')
             df_raw.to_excel(writer, 'raw_stationID' + site_code, index=False)
             df_15_reindex.to_excel(writer, '15min', index=False, na_rep='#N/A')
             df_30_reindex.to_excel(writer, '30min', index=False, na_rep='#N/A')
@@ -128,6 +130,7 @@ def _data_reader(file):
                  'D05536700': 'Calumet-Sag Channel', 'D05536890': 'CSSC-Lemont',
                  'D05536995': 'CSSC-Romeoville'}
     df_raw = pd.read_csv(file)
+    df_raw['dateTime'] = pd.to_datetime(df_raw['dateTime'])
     # Creating a dataframe with the data we only need.
     df = df_raw[['dateTime', 'X_00065_00000']]
     df = df.set_index(df_raw['dateTime'])
@@ -181,6 +184,7 @@ def _resampler(df_year, year):
     # pd.concat is used because the column lengths are different.
     df_15_reindex = pd.concat([
         df_15_reindex, df_year.reset_index(drop=True)], axis=1)
+    df_15_reindex['dateTime'] = pd.to_datetime(df_15_reindex['dateTime'])
     # Reordering columns to match example excel.
     df_15_reindex = df_15_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
@@ -204,6 +208,7 @@ def _resampler(df_year, year):
     df_30_reindex = df_30_reindex.reset_index(drop=True)
     df_30_reindex = pd.concat([
         df_30_reindex, df_year.reset_index(drop=True)], axis=1)
+    df_30_reindex['dateTime'] = pd.to_datetime(df_30_reindex['dateTime'])
     df_30_reindex = df_30_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
         'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
@@ -225,6 +230,7 @@ def _resampler(df_year, year):
     df_1h_reindex = df_1h_reindex.reset_index(drop=True)
     df_1h_reindex = pd.concat([
         df_1h_reindex, df_year.reset_index(drop=True)], axis=1)
+    df_1h_reindex['dateTime'] = pd.to_datetime(df_1h_reindex['dateTime'])
     df_1h_reindex = df_1h_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
         'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
@@ -246,6 +252,7 @@ def _resampler(df_year, year):
     df_1d_reindex = df_1d_reindex.reset_index(drop=True)
     df_1d_reindex = pd.concat([
         df_1d_reindex, df_year.reset_index(drop=True)], axis=1)
+    df_1d_reindex['dateTime'] = pd.to_datetime(df_1d_reindex['dateTime'])
     df_1d_reindex = df_1d_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
         'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
