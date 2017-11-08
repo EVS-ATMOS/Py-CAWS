@@ -10,8 +10,7 @@ import numpy as np
 def stage_output(stage_file, to_excel=True, excel_filepath=None,
                  to_csv=False, csv_filepath=None):
     """
-    Stage Output, takes in raw stage data and outputs aggregated
-    stage data.
+    Stage Output, takes in raw stage data and outputs aggregated stage data.
 
     Parameter
     ---------
@@ -21,24 +20,22 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
     Optional Parameters
     -------------------
     to_excel : bool
-        Choose whether or not to write the data to a excel file.
-        Default is True.
+        Choose whether or not to write the data to a excel file. Default is True.
     excel_filepath : str
-        Filepath location to save excel file to. Default is
-        None and the excel file is saved to user's home directory.
+        Filepath location to save excel file to. Default is None and the excel file
+        is saved to user's home directory.
     to_csv : bool
-        Choose whether or not to write the data to a csv file.
-        Default is False.
+        Choose whether or not to write the data to a csv file. Default is False.
     csv_filepath : str
-        Filepath location to save csv file to. Default is
-        None and the csv file is saved to user's home directory.
+        Filepath location to save csv file to. Default is None and the csv file
+        is saved to user's home directory.
 
     """
 
     # Creates a raw dataframe for the raw excel sheet and a dataframe
     # to be used in the aggregation.
     df_raw, df, site, site_code = _data_reader(stage_file)
-    df_raw.drop('Unnamed: 0', axis=1)
+    df_raw = df_raw.rename(columns={'Unnamed: 0': ''})
 
     # Seperate data into years and creates an excel file for each year.
     start_year = df.index[0].to_pydatetime()
@@ -48,8 +45,8 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
     for year in years_str:
         df_year = df.loc[year]
         df_15_reindex, df_30_reindex, df_1h_reindex, df_1d_reindex = _resampler(
-            df_year, site, year)
-
+            df_year, year)
+        del df_year
         # Saving data to a excel file if to_excel is True.
         if to_excel is True:
             if excel_filepath is None:
@@ -59,12 +56,11 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
                 save_path = (excel_filepath + site + '_'
                              + str(year) + '_stage_data.xlsx')
 
-            # Takes raw and each time interval of data and creates a sheet
-            # for each.
+            # Takes raw and each time interval of data and creates a sheet for each.
             writer = pd.ExcelWriter(save_path, engine='xlsxwriter',
                                     datetime_format='m/d/yyyy h:mm',
                                     date_format='m/d/yyyy')
-            df_raw.to_excel(writer, 'raw_stationID' + site_code, index=False)
+            df_raw.to_excel(writer, 'raw_stationID_' + site_code, index=False)
             df_15_reindex.to_excel(writer, '15min', index=False, na_rep='#N/A')
             df_30_reindex.to_excel(writer, '30min', index=False, na_rep='#N/A')
             df_1h_reindex.to_excel(writer, 'hourly', index=False, na_rep='#N/A')
@@ -73,16 +69,16 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
             # Formatting of the excel sheets. Without format1 the time is saved
             # in decimal form in the excel sheet.
             workbook = writer.book
-            format1 = workbook.add_format({'num_format': 'hh:mm:ss'})
-            worksheet_raw = writer.sheets['raw_stationID' + site_code]
+            format1 = workbook.add_format({'num_format': 'h:mm'})
+            worksheet_raw = writer.sheets['raw_stationID_' + site_code]
             worksheet_15 = writer.sheets['15min']
             worksheet_30 = writer.sheets['30min']
             worksheet_1h = writer.sheets['hourly']
             worksheet_1d = writer.sheets['daily']
             worksheets = [worksheet_15, worksheet_30, worksheet_1h, worksheet_1d]
             for worksheet in worksheets:
-                worksheet.set_column('A:L', 20)
-                worksheet.set_column('D:E', 20, format1)
+                worksheet.set_column('A:L', 22)
+                worksheet.set_column('D:E', 22, format1)
             worksheet_raw.set_column('A:F', 20)
             writer.save()
             workbook.close()
@@ -99,14 +95,10 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
                 save_path_1d = (os.path.expanduser('~') + '/' + site + '_'
                                 + str(year) + '_daily_stage_data.csv')
             else:
-                save_path_15 = (csv_filepath + site + '_' + str(year)
-                                + '_15min_stage_data.csv')
-                save_path_30 = (csv_filepath + site + '_' + str(year)
-                                + '_30min_stage_data.csv')
-                save_path_1h = (csv_filepath + site + '_' + str(year)
-                                + '_hourly_stage_data.csv')
-                save_path_1d = (csv_filepath + site + '_' + str(year)
-                                + '_daily_stage_data.csv')
+                save_path_15 = csv_filepath + site + '_15min_stage_data.csv'
+                save_path_30 = csv_filepath + site + '_30min_stage_data.csv'
+                save_path_1h = csv_filepath + site + '_hourly_stage_data.csv'
+                save_path_1d = csv_filepath + site + '_daily_stage_data.csv'
 
             df_15_reindex.to_csv(save_path_15)
             df_30_reindex.to_csv(save_path_30)
@@ -114,7 +106,7 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
             df_1d_reindex.to_csv(save_path_1d)
 
         # Deletes dataframes after each year loop to save memory.
-        del df_year, df_15_reindex, df_30_reindex, df_1h_reindex, df_1d_reindex
+        del df_15_reindex, df_30_reindex, df_1h_reindex, df_1d_reindex
     # Deletes dataframes after the year loop is completed to save memory.
     del df_raw, df
     return
@@ -152,16 +144,23 @@ def _data_reader(file):
 def _resampler(df_year, year):
     """ Takes raw data and aggregates it by mean and reindex so data
     begins in January and ends in December. """
-    # Aggregates data using mean for each time interval.
-    df_15 = df_year.resample('15T').mean()
-    df_30 = df_year.resample('30T').mean()
-    df_1h = df_year.resample('1H').mean()
-    df_1d = df_year.resample('D').mean()
+    # Aggregates data using mean for each time interval and gets a
+    # sample count for each new data point.
+    df_15 = df_year.resample('15T').apply(['mean', 'count'])
+    df_30 = df_year.resample('30T').apply(['mean', 'count'])
+    df_1h = df_year.resample('1H').apply(['mean', 'count'])
+    df_1d = df_year.resample('D').apply(['mean', 'count'])
+
+    # Removes top level title that is not needed.
+    df_15.columns = df_15.columns.droplevel(0)
+    df_30.columns = df_30.columns.droplevel(0)
+    df_1h.columns = df_1h.columns.droplevel(0)
+    df_1d.columns = df_1d.columns.droplevel(0)
 
     # Creating new date range to include all time intervals within the year.
-    idx_15 = pd.date_range(str(year) + '-01-01 00:15:00',
+    idx_15 = pd.date_range(str(year) + '-01-01 00:00:00',
                            str(year) + '-12-31 23:45:00', freq='15T')
-    idx_30 = pd.date_range(str(year) + '-01-01 00:30:00',
+    idx_30 = pd.date_range(str(year) + '-01-01 00:00:00',
                            str(year) + '-12-31 23:30:00', freq='30T')
     idx_1h = pd.date_range(str(year) + '-01-01 00:00:00',
                            str(year) + '-12-31 23:00:00', freq='1H')
@@ -171,10 +170,16 @@ def _resampler(df_year, year):
     # Reindexing so data that starts in, for example August, will now
     # have the months prior to August filled with nans.
     df_15_reindex = df_15.reindex(idx_15, fill_value=np.nan)
+    df_15_reindex[['count']] = df_15_reindex[['count']].fillna(0).astype(int)
     # Adding all columns to match example excel.
-    df_15_reindex = df_15_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
-    # Adding meters column by dividing the feet column by 3.28.
+    df_15_reindex = df_15_reindex.rename(columns={'mean': 'H(ft)'})
+    df_15_reindex = df_15_reindex.rename(columns={'count': 'SampleCount'})
+
+    # Adding meters column.
     df_15_reindex['H(m)'] = df_15_reindex['H(ft)'] / 3.28
+    # Rounds meters column so significant digits match
+    # original height column.
+    df_15_reindex['H(m)'] = df_15_reindex['H(m)'].round(2)
     df_15_reindex['DateTime2'] = df_15_reindex.index
     df_15_reindex['Date'] = df_15_reindex.index
     df_15_reindex['Date2'] = df_15_reindex.index
@@ -191,7 +196,8 @@ def _resampler(df_year, year):
     # Reordering columns to match example excel.
     df_15_reindex = df_15_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
-        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
+        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'SampleCount', 'Date2',
+        'H(m)_final']]
     # Filling nans with empty cells in columns similar to example excel.
     df_15_reindex[[
         'dateTime', 'X_00065_00000', 'H(m)_final'
@@ -199,8 +205,11 @@ def _resampler(df_year, year):
 
     # Similar to 15 minute interval code but 30 minutes interval.
     df_30_reindex = df_30.reindex(idx_30, fill_value=np.nan)
-    df_30_reindex = df_30_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_30_reindex[['count']] = df_30_reindex[['count']].fillna(0).astype(int)
+    df_30_reindex = df_30_reindex.rename(columns={'mean': 'H(ft)'})
+    df_30_reindex = df_30_reindex.rename(columns={'count': 'SampleCount'})
     df_30_reindex['H(m)'] = df_30_reindex['H(ft)'] / 3.28
+    df_30_reindex['H(m)'] = df_30_reindex['H(m)'].round(2)
     df_30_reindex['DateTime2'] = df_30_reindex.index
     df_30_reindex['Date'] = df_30_reindex.index
     df_30_reindex['Date2'] = df_30_reindex.index
@@ -214,15 +223,19 @@ def _resampler(df_year, year):
     df_30_reindex['dateTime'] = pd.to_datetime(df_30_reindex['dateTime'])
     df_30_reindex = df_30_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
-        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
+        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'SampleCount', 'Date2',
+        'H(m)_final']]
     df_30_reindex[[
         'dateTime', 'X_00065_00000', 'H(m)_final'
     ]] = df_30_reindex[['dateTime', 'X_00065_00000', 'H(m)_final']].fillna('')
 
     # Similar to 15 minute interval code but hourly interval.
     df_1h_reindex = df_1h.reindex(idx_1h, fill_value=np.nan)
-    df_1h_reindex = df_1h_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_1h_reindex[['count']] = df_1h_reindex[['count']].fillna(0).astype(int)
+    df_1h_reindex = df_1h_reindex.rename(columns={'mean': 'H(ft)'})
+    df_1h_reindex = df_1h_reindex.rename(columns={'count': 'SampleCount'})
     df_1h_reindex['H(m)'] = df_1h_reindex['H(ft)'] / 3.28
+    df_1h_reindex['H(m)'] = df_1h_reindex['H(m)'].round(2)
     df_1h_reindex['DateTime2'] = df_1h_reindex.index
     df_1h_reindex['Date'] = df_1h_reindex.index
     df_1h_reindex['Date2'] = df_1h_reindex.index
@@ -236,15 +249,19 @@ def _resampler(df_year, year):
     df_1h_reindex['dateTime'] = pd.to_datetime(df_1h_reindex['dateTime'])
     df_1h_reindex = df_1h_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
-        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
+        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'SampleCount', 'Date2',
+        'H(m)_final']]
     df_1h_reindex[[
         'dateTime', 'X_00065_00000', 'H(m)_final'
     ]] = df_1h_reindex[['dateTime', 'X_00065_00000', 'H(m)_final']].fillna('')
 
     # Similar to 15 minute interval code but daily interval.
     df_1d_reindex = df_1d.reindex(idx_1d, fill_value=np.nan)
-    df_1d_reindex = df_1d_reindex.rename(columns={'X_00065_00000': 'H(ft)'})
+    df_1d_reindex[['count']] = df_1d_reindex[['count']].fillna(0).astype(int)
+    df_1d_reindex = df_1d_reindex.rename(columns={'mean': 'H(ft)'})
+    df_1d_reindex = df_1d_reindex.rename(columns={'count': 'SampleCount'})
     df_1d_reindex['H(m)'] = df_1d_reindex['H(ft)'] / 3.28
+    df_1d_reindex['H(m)'] = df_1d_reindex['H(m)'].round(2)
     df_1d_reindex['DateTime2'] = df_1d_reindex.index
     df_1d_reindex['Date'] = df_1d_reindex.index
     df_1d_reindex['Date2'] = df_1d_reindex.index
@@ -258,7 +275,8 @@ def _resampler(df_year, year):
     df_1d_reindex['dateTime'] = pd.to_datetime(df_1d_reindex['dateTime'])
     df_1d_reindex = df_1d_reindex[[
         'dateTime', 'X_00065_00000', 'Date_Python_generated', 'Time1', 'Time2',
-        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'Date2', 'H(m)_final']]
+        'DateTime2', 'Date', 'H(ft)', 'H(m)', 'SampleCount', 'Date2',
+        'H(m)_final']]
     df_1d_reindex[[
         'dateTime', 'X_00065_00000', 'H(m)_final'
     ]] = df_1d_reindex[['dateTime', 'X_00065_00000', 'H(m)_final']].fillna('')
