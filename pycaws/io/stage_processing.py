@@ -180,6 +180,7 @@ def _resampler(df_year, year):
     # Rounds meters column so significant digits match
     # original height column.
     df_15_reindex['H(m)'] = df_15_reindex['H(m)'].round(2)
+    df_15_reindex['H(ft)'] = df_15_reindex['H(ft)'].round(2)
     df_15_reindex['DateTime2'] = df_15_reindex.index
     df_15_reindex['Date'] = df_15_reindex.index
     df_15_reindex['Date2'] = df_15_reindex.index
@@ -210,6 +211,7 @@ def _resampler(df_year, year):
     df_30_reindex = df_30_reindex.rename(columns={'count': 'SampleCount'})
     df_30_reindex['H(m)'] = df_30_reindex['H(ft)'] / 3.28
     df_30_reindex['H(m)'] = df_30_reindex['H(m)'].round(2)
+    df_30_reindex['H(ft)'] = df_30_reindex['H(ft)'].round(2)
     df_30_reindex['DateTime2'] = df_30_reindex.index
     df_30_reindex['Date'] = df_30_reindex.index
     df_30_reindex['Date2'] = df_30_reindex.index
@@ -236,6 +238,7 @@ def _resampler(df_year, year):
     df_1h_reindex = df_1h_reindex.rename(columns={'count': 'SampleCount'})
     df_1h_reindex['H(m)'] = df_1h_reindex['H(ft)'] / 3.28
     df_1h_reindex['H(m)'] = df_1h_reindex['H(m)'].round(2)
+    df_1h_reindex['H(ft)'] = df_1h_reindex['H(ft)'].round(2)
     df_1h_reindex['DateTime2'] = df_1h_reindex.index
     df_1h_reindex['Date'] = df_1h_reindex.index
     df_1h_reindex['Date2'] = df_1h_reindex.index
@@ -262,6 +265,7 @@ def _resampler(df_year, year):
     df_1d_reindex = df_1d_reindex.rename(columns={'count': 'SampleCount'})
     df_1d_reindex['H(m)'] = df_1d_reindex['H(ft)'] / 3.28
     df_1d_reindex['H(m)'] = df_1d_reindex['H(m)'].round(2)
+    df_1d_reindex['H(ft)'] = df_1d_reindex['H(ft)'].round(2)
     df_1d_reindex['DateTime2'] = df_1d_reindex.index
     df_1d_reindex['Date'] = df_1d_reindex.index
     df_1d_reindex['Date2'] = df_1d_reindex.index
