@@ -149,6 +149,62 @@ def _station_roll_stats(df, station):
     df_sta['Tstd120'] = (temp/(df_sta['AirTemp_C'].rolling(
         '120H', min_periods=120).count()-1)).apply(np.sqrt)
 
+    # To ignore NaNs, we need to explicitly calculate mean and standard deviation
+    df_sta['Tsum1'] = df_sta['AirTemp_C'].rolling('1H', min_periods=1).sum()
+    df_sta['Tsum2'] = df_sta['AirTemp_C'].rolling('2H', min_periods=2).sum()
+    df_sta['Tsum6'] = df_sta['AirTemp_C'].rolling('6H', min_periods=6).sum()
+    df_sta['Tsum12'] = df_sta['AirTemp_C'].rolling('12H', min_periods=12).sum()
+    df_sta['Tsum24'] = df_sta['AirTemp_C'].rolling('24H', min_periods=24).sum()
+    df_sta['Tsum48'] = df_sta['AirTemp_C'].rolling('48H', min_periods=48).sum()
+    df_sta['Tsum72'] = df_sta['AirTemp_C'].rolling('72H', min_periods=72).sum()
+    df_sta['Tsum96'] = df_sta['AirTemp_C'].rolling('96H', min_periods=96).sum()
+    df_sta['Tsum120'] = df_sta['AirTemp_C'].rolling(
+         '120H', min_periods=120).sum()
+
+    # To ignore NaNs, we need to explicitly calculate mean and standard deviation
+    df_sta['Tmin1'] = df_sta['AirTemp_C'].rolling('1H', min_periods=1).max()
+    df_sta['Tmin2'] = df_sta['AirTemp_C'].rolling('2H', min_periods=2).max()
+    df_sta['Tmin6'] = df_sta['AirTemp_C'].rolling('6H', min_periods=6).max()
+    df_sta['Tmin12'] = df_sta['AirTemp_C'].rolling('12H', min_periods=12).max()
+    df_sta['Tmin24'] = df_sta['AirTemp_C'].rolling('24H', min_periods=24).max()
+    df_sta['Tmin48'] = df_sta['AirTemp_C'].rolling('48H', min_periods=48).max()
+    df_sta['Tmin72'] = df_sta['AirTemp_C'].rolling('72H', min_periods=72).max()
+    df_sta['Tmin96'] = df_sta['AirTemp_C'].rolling('96H', min_periods=96).max()
+    df_sta['Tmin120'] = df_sta['AirTemp_C'].rolling(
+        '120H', min_periods=120).max()
+
+    # To ignore NaNs, we need to explicitly calculate mean and standard deviation
+    df_sta['Tmin1'] = df_sta['AirTemp_C'].rolling('1H', min_periods=1).min()
+    df_sta['Tmin2'] = df_sta['AirTemp_C'].rolling('2H', min_periods=2).min()
+    df_sta['Tmin6'] = df_sta['AirTemp_C'].rolling('6H', min_periods=6).min()
+    df_sta['Tmin12'] = df_sta['AirTemp_C'].rolling('12H', min_periods=12).min()
+    df_sta['Tmin24'] = df_sta['AirTemp_C'].rolling('24H', min_periods=24).min()
+    df_sta['Tmin48'] = df_sta['AirTemp_C'].rolling('48H', min_periods=48).min()
+    df_sta['Tmin72'] = df_sta['AirTemp_C'].rolling('72H', min_periods=72).min()
+    df_sta['Tmin96'] = df_sta['AirTemp_C'].rolling('96H', min_periods=96).min()
+    df_sta['Tmin120'] = df_sta['AirTemp_C'].rolling(
+        '120H', min_periods=120).min()
+
+    # Difference between first and last
+    df_sta['Tdiff1'] = df_sta['AirTemp_C'].rolling(
+        '1H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff2'] = df_sta['AirTemp_C'].rolling(
+        '2H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff6'] = df_sta['AirTemp_C'].rolling(
+        '6H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff12'] = df_sta['AirTemp_C'].rolling(
+        '12H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff24'] = df_sta['AirTemp_C'].rolling(
+        '24H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff48'] = df_sta['AirTemp_C'].rolling(
+        '48H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff72'] = df_sta['AirTemp_C'].rolling(
+        '72H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff96'] = df_sta['AirTemp_C'].rolling(
+        '96H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+    df_sta['Tdiff120'] = df_sta['AirTemp_C'].rolling(
+        '120H', min_periods=1, closed='both').apply(lambda x: x[-1] - x[0])
+
     # Round all answers to 1 decimal place (original
     # precision of temperature data).
     df_sta = df_sta.round(1)
