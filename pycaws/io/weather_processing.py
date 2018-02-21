@@ -1,8 +1,6 @@
 """ Code that takes raw weather data and does mean and standard
 deviation calculations. Processed data can then be saved as excel. """
 
-import os
-
 import numpy as np
 import pandas as pd
 

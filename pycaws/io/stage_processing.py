@@ -1,14 +1,11 @@
 """ Code that takes raw stage data and does aggregation at different
 time intervals. Processed data can then be saved as excel or csv. """
 
-import os
-
 import pandas as pd
 import numpy as np
 
 
-def stage_output(stage_file, to_excel=True, excel_filepath=None,
-                 to_csv=False, csv_filepath=None):
+def stage_output(stage_file, excel_filepath):
     """
     Stage Output, takes in raw stage data and outputs aggregated stage data.
 
@@ -16,22 +13,11 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
     ---------
     stage_file : str
         Filename of stage file to process.
-
-    Optional Parameters
-    -------------------
-    to_excel : bool
-        Choose whether or not to write the data to a excel file. Default is True.
     excel_filepath : str
-        Filepath location to save excel file to. Default is None and the excel file
-        is saved to user's home directory.
-    to_csv : bool
-        Choose whether or not to write the data to a csv file. Default is False.
-    csv_filepath : str
-        Filepath location to save csv file to. Default is None and the csv file
-        is saved to user's home directory.
+        Filepath location to save excel file to. This is a directory, the
+        actual filename is created from the site information and year.
 
     """
-
     # Creates a raw dataframe for the raw excel sheet and a dataframe
     # to be used in the aggregation.
     df_raw, df, site, site_code = _data_reader(stage_file)
@@ -48,62 +34,35 @@ def stage_output(stage_file, to_excel=True, excel_filepath=None,
             df_year, year)
         del df_year
         # Saving data to a excel file if to_excel is True.
-        if to_excel is True:
-            if excel_filepath is None:
-                save_path = (os.path.expanduser('~') + '/' + site + '_'
-                             + str(year) + '_stage_data.xlsx')
-            else:
-                save_path = (excel_filepath + site + '_'
-                             + str(year) + '_stage_data.xlsx')
+        save_path = (excel_filepath + site + '_'
+                     + str(year) + '_stage_data.xlsx')
 
-            # Takes raw and each time interval of data and creates a sheet for each.
-            writer = pd.ExcelWriter(save_path, engine='xlsxwriter',
-                                    datetime_format='m/d/yyyy h:mm',
-                                    date_format='m/d/yyyy')
-            df_raw.to_excel(writer, 'raw_stationID_' + site_code, index=False)
-            df_15_reindex.to_excel(writer, '15min', index=False, na_rep='#N/A')
-            df_30_reindex.to_excel(writer, '30min', index=False, na_rep='#N/A')
-            df_1h_reindex.to_excel(writer, 'hourly', index=False, na_rep='#N/A')
-            df_1d_reindex.to_excel(writer, 'daily', index=False, na_rep='#N/A')
+        # Takes raw and each time interval of data and creates a sheet for each.
+        writer = pd.ExcelWriter(save_path, engine='xlsxwriter',
+                                datetime_format='m/d/yyyy h:mm',
+                                date_format='m/d/yyyy')
+        df_raw.to_excel(writer, 'raw_stationID_' + site_code, index=False)
+        df_15_reindex.to_excel(writer, '15min', index=False, na_rep='#N/A')
+        df_30_reindex.to_excel(writer, '30min', index=False, na_rep='#N/A')
+        df_1h_reindex.to_excel(writer, 'hourly', index=False, na_rep='#N/A')
+        df_1d_reindex.to_excel(writer, 'daily', index=False, na_rep='#N/A')
 
-            # Formatting of the excel sheets. Without format1 the time is saved
-            # in decimal form in the excel sheet.
-            workbook = writer.book
-            format1 = workbook.add_format({'num_format': 'h:mm'})
-            worksheet_raw = writer.sheets['raw_stationID_' + site_code]
-            worksheet_15 = writer.sheets['15min']
-            worksheet_30 = writer.sheets['30min']
-            worksheet_1h = writer.sheets['hourly']
-            worksheet_1d = writer.sheets['daily']
-            worksheets = [worksheet_15, worksheet_30, worksheet_1h, worksheet_1d]
-            for worksheet in worksheets:
-                worksheet.set_column('A:L', 22)
-                worksheet.set_column('D:E', 22, format1)
-            worksheet_raw.set_column('A:F', 20)
-            writer.save()
-            workbook.close()
-
-        # Saving data to a csv file if to_csv is True.
-        if to_csv is True:
-            if csv_filepath is None:
-                save_path_15 = (os.path.expanduser('~') + '/' + site + '_'
-                                + str(year) + '_15min_stage_data.csv')
-                save_path_30 = (os.path.expanduser('~') + '/' + site + '_'
-                                + str(year) + '_30min_stage_data.csv')
-                save_path_1h = (os.path.expanduser('~') + '/' + site + '_'
-                                + str(year) + '_hourly_stage_data.csv')
-                save_path_1d = (os.path.expanduser('~') + '/' + site + '_'
-                                + str(year) + '_daily_stage_data.csv')
-            else:
-                save_path_15 = csv_filepath + site + '_15min_stage_data.csv'
-                save_path_30 = csv_filepath + site + '_30min_stage_data.csv'
-                save_path_1h = csv_filepath + site + '_hourly_stage_data.csv'
-                save_path_1d = csv_filepath + site + '_daily_stage_data.csv'
-
-            df_15_reindex.to_csv(save_path_15)
-            df_30_reindex.to_csv(save_path_30)
-            df_1h_reindex.to_csv(save_path_1h)
-            df_1d_reindex.to_csv(save_path_1d)
+        # Formatting of the excel sheets. Without format1 the time is saved
+        # in decimal form in the excel sheet.
+        workbook = writer.book
+        format1 = workbook.add_format({'num_format': 'h:mm'})
+        worksheet_raw = writer.sheets['raw_stationID_' + site_code]
+        worksheet_15 = writer.sheets['15min']
+        worksheet_30 = writer.sheets['30min']
+        worksheet_1h = writer.sheets['hourly']
+        worksheet_1d = writer.sheets['daily']
+        worksheets = [worksheet_15, worksheet_30, worksheet_1h, worksheet_1d]
+        for worksheet in worksheets:
+            worksheet.set_column('A:L', 22)
+            worksheet.set_column('D:E', 22, format1)
+        worksheet_raw.set_column('A:F', 20)
+        writer.save()
+        workbook.close()
 
         # Deletes dataframes after each year loop to save memory.
         del df_15_reindex, df_30_reindex, df_1h_reindex, df_1d_reindex
