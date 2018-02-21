@@ -19,10 +19,11 @@ def weather_output(filename, to_excel=True, excel_filepath=None):
     Optional Parameters
     -------------------
     to_excel : bool
-        Choose whether or not to write the data to a excel file. Default is True.
+        Choose whether or not to write the data to a excel file. Default
+        is True.
     excel_filepath : str
-        Filepath location to save excel file to. Default is None and the excel file
-        is saved to user's home directory.
+        Filepath location to save excel file to. Default is None and the excel
+        file is saved to user's home directory.
 
     """
 
@@ -159,7 +160,7 @@ def _station_roll_stats(df, station):
     df_sta['Tsum72'] = df_sta['AirTemp_C'].rolling('72H', min_periods=72).sum()
     df_sta['Tsum96'] = df_sta['AirTemp_C'].rolling('96H', min_periods=96).sum()
     df_sta['Tsum120'] = df_sta['AirTemp_C'].rolling(
-         '120H', min_periods=120).sum()
+        '120H', min_periods=120).sum()
 
     # To ignore NaNs, we need to explicitly calculate mean and standard deviation
     df_sta['Tmin1'] = df_sta['AirTemp_C'].rolling('1H', min_periods=1).max()
