@@ -34,7 +34,6 @@ def get_gbm_importance(site_dict, num_ensembles=250, target_name='target'):
         ninety_five_importance = 95th percentile of importance
 
     """
-
     X, y = shuffle(site_dict['data'], site_dict[target_name])
     num_features = X.shape[1]
     importance = np.zeros((num_ensembles, num_features))
@@ -72,6 +71,7 @@ def get_gbm_importance(site_dict, num_ensembles=250, target_name='target'):
 def dimension_reduced_dict(
         site_dict, importance_field='ninety_fifth_percentile_importance',
         threshold=20):
+    """ Creates the dimension reduced dictionary. """
     where_met = np.where(site_dict[importance_field] >= threshold)[0]
     return_dic = {}
     return_dic['feature_names'] = [site_dict['feature_names'][x] for x in where_met]
@@ -104,7 +104,6 @@ def transform_target(site_dict, target_name='target',
         Site dictionary with transformed variable.
 
     """
-
     if not target_name in site_dict.keys():
         print(target_name + ' does not exist in dictionary!')
         return
@@ -145,7 +144,6 @@ def do_GBM_second_pass(site_dict, n_variables=15, target_name='target',
         Dictionary with importances, RMSE, deviances, etc.
 
     """
-
     new_dict = deepcopy(site_dict)
     importance_sorted = sorted(new_dict[importance_variable], reverse=True)
     new_dict = dimension_reduced_dict(
@@ -226,7 +224,6 @@ def predict_GBM(site_dict, predict_dict):
         Dictionary with added prediction of FIB.
 
     """
-
     # Reduce dimensionality of predicted dictionary.
     feature_names = site_dict['feature_names']
     data_list = []
