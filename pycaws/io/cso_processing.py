@@ -11,9 +11,8 @@ def cso_output(filename, site_name, excel_filepath):
     """
     Parameters
     ----------
-    filename : list
-        A list of files of a site to be processed. The list can
-        be created by using glob.glob.
+    filename : str
+        Filename of the excel document with the site's cso data.
     site_name : str
         The name of the site being processed. For example: 'OBrien'.
     excel_filepath : str
