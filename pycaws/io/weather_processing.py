@@ -15,15 +15,9 @@ def weather_output(filename, excel_filepath):
     ---------
     filename : str
         Filename of csv with all the weather station data.
-
-    Optional Parameters
-    -------------------
-    to_excel : bool
-        Choose whether or not to write the data to a excel file. Default
-        is True.
     excel_filepath : str
-        Filepath location to save excel file to. Default is None and the excel
-        file is saved to user's home directory.
+        Filepath location to save excel file to. This is a directory,
+        the actually filename is created using the site information.
 
     """
     site_dict = {'WBAN:04807': 'Gary', 'WBAN:04831': 'Romeoville',
