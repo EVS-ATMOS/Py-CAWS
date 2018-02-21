@@ -5,6 +5,7 @@ Input and output
 
 Functions to read, process and write stage and weather data.
 
+    cso_output
     stage_output
     weather_output
     load_caws_site
@@ -13,6 +14,7 @@ Functions to read, process and write stage and weather data.
 
 """
 
+from .cso_processing import cso_output
 from .stage_processing import stage_output
 from .weather_processing import weather_output
 from .variable_importance import load_caws_site, load_predict_site
